@@ -1,3 +1,6 @@
 *.dylib
 zig-cache
 *.id
+*.dll
+*.lib
+*.pdb

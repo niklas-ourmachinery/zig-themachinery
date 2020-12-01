@@ -1,6 +1,51 @@
 // Zig plugin that draws a custom tab.
 //
-// zig build-lib tm_custom_tab.zig tm_custom_tab_helper.c -I $TM_SDK_DIR/headers -I . -dynamic
+// Build on Windows:
+//
+//     zig build-lib tm_custom_tab.zig tm_custom_tab_helper.c -I %TM_SDK_DIR%/headers -I . -lc -dynamic
+//
+// Build on OS X:
+//
+//     zig build-lib tm_custom_tab.zig tm_custom_tab_helper.c -I $TM_SDK_DIR/headers -I . -dynamic
+//
+// In order to compile this you need to make some changes to the The Machinery headers to workaround C
+// features not (yet?) supported by Zig.
+//
+// foundation/api_types.h:
+//
+// ~~~
+// typedef struct tm_tt_id_t
+// {
+//     union
+//     {
+//         // Used for comparing objects or storing them in hash tables.
+//         uint64_t u64;
+// 
+// #ifndef TM_ZIG
+//         struct
+//         {
+//             // Type of the object.
+//             uint64_t type : 10;
+//             // Generation of the object, used to distinguish objects created at the same index.
+//             uint64_t generation : 22;
+//             // Index of the object.
+//             uint64_t index : 32;
+//         };
+// #endif
+//     };
+// } tm_tt_id_t;
+// ~~~
+//
+// the_machinery/the_machinery_tab.h:
+//
+// ~~~
+// #ifdef TM_ZIG
+//     struct tm_tab_vt tm_tab_vt;
+// #else
+//     struct tm_tab_vt;
+// #endif
+// ~~~
+// ~~~
 
 const std = @import("std");
 
@@ -84,6 +129,7 @@ export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_fon
     style.font_scale = font_scale;
     style.color.a = 255;
     style.color.r = 255;
+    style.color.g = 255;
     tm_draw2d_api.fill_rect.?(uib.vbuffer, uib.ibuffers[0], &style, rect.*);
 }
 
