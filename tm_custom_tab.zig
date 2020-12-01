@@ -75,7 +75,7 @@ fn tab__destroy(ctab: ?*c.tm_tab_o) callconv(.C) void {
     _ = a.*.realloc.?(a, &tab, @sizeOf(@TypeOf(tab)), 0, src.file, src.line);
 }
 
-export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_font_t, font_scale: f32, ui: *c.tm_ui_o, rect: *c.tm_rect_t) callconv(.C) void {
+export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_font_t, font_scale: f32, ui: *c.tm_ui_o, rect: *const c.tm_rect_t) callconv(.C) void {
     var uib = tm_ui_api.buffers.?(ui);
     var style: c.tm_draw2d_style_t = undefined;
     std.mem.set(u8, std.mem.asBytes(&style), 0);
@@ -103,7 +103,9 @@ export fn tm_load_plugin(reg: *c.tm_api_registry_api, load: bool) void {
 
     if (load) {
         reg.add_implementation.?(c.TM_TAB_VT_INTERFACE_NAME, &custom_tab_vt);
+        reg.set.?(TM_CUSTOM_TAB_VT_NAME, &custom_tab_vt, @sizeOf(@TypeOf(custom_tab_vt)));
     } else {
         reg.remove_implementation.?(c.TM_TAB_VT_INTERFACE_NAME, &custom_tab_vt);
+        reg.remove.?(&custom_tab_vt);
     }
 }
