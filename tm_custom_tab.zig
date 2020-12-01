@@ -75,24 +75,17 @@ fn tab__destroy(ctab: ?*c.tm_tab_o) callconv(.C) void {
     _ = a.*.realloc.?(a, &tab, @sizeOf(@TypeOf(tab)), 0, src.file, src.line);
 }
 
-export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_font_t, font_scale: f32, ui: ?*c.tm_ui_o, rect: ?*c.tm_rect_t) callconv(.C) void {}
-
-const c_code =
-    \\ static void tab__ui(tm_tab_o *tab, uint32_t font, const tm_font_t *font_info, float font_scale, tm_ui_o *ui, tm_rect_t rect)
-    \\ {
-    \\     tm_ui_buffers_t uib = tm_ui_api->buffers(ui);
-    \\     const tm_ui_style_t *uistyle = &(tm_ui_style_t){
-    \\         .font = font,
-    \\         .font_info = font_info,
-    \\         .font_scale = font_scale,
-    \\     };
-    \\     tm_draw2d_style_t *style = &(tm_draw2d_style_t){ 0 };
-    \\     tm_ui_api->to_draw_style(ui, style, uistyle);
-    \\ 
-    \\     style->color = (tm_color_srgb_t){ .a = 255, .r = 255 };
-    \\     tm_draw2d_api->fill_rect(uib.vbuffer, *uib.ibuffers, style, rect);
-    \\ }
-;
+export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_font_t, font_scale: f32, ui: *c.tm_ui_o, rect: *c.tm_rect_t) callconv(.C) void {
+    var uib = tm_ui_api.buffers.?(ui);
+    var style: c.tm_draw2d_style_t = undefined;
+    std.mem.set(u8, std.mem.asBytes(&style), 0);
+    style.font = font;
+    style.font_info = font_info;
+    style.font_scale = font_scale;
+    style.color.a = 255;
+    style.color.r = 255;
+    tm_draw2d_api.fill_rect.?(uib.vbuffer, uib.ibuffers[0], &style, rect.*);
+}
 
 fn get(comptime T: type, reg: *c.tm_api_registry_api, name: [*c]const u8) T {
     const voidptr = reg.*.get.?(name);
