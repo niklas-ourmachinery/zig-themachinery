@@ -128,7 +128,7 @@ export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_fon
     style.font_scale = font_scale;
     style.color.a = 255;
     style.color.r = 255;
-    style.color.g = 255;
+    style.color.g = @floatToInt(u8, std.math.absFloat(std.math.sin(@intToFloat(f64, std.time.milliTimestamp()) / 1000.0)) * 255);
     tm_draw2d_api.fill_rect.?(uib.vbuffer, uib.ibuffers[0], &style, rect.*);
 }
 
