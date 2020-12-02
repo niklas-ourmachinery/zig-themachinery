@@ -88,11 +88,11 @@ fn initCustomTab() void {
 }
 
 fn tab__create_menu_name() callconv(.C) [*c]const u8 {
-    return "Custom Tab";
+    return "Zig";
 }
 
 fn tab__title(ctab: ?*c.tm_tab_o, ui: ?*c.tm_ui_o) callconv(.C) [*c]const u8 {
-    return "Custom Tab";
+    return "Zig";
 }
 
 fn tab__create(context: ?*c.tm_tab_create_context_t) callconv(.C) ?*c.tm_tab_i {
