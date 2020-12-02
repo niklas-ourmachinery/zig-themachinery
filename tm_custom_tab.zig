@@ -64,8 +64,8 @@ const c = @cImport({
 
 var tm_global_api_registry: c.tm_api_registry_api = undefined;
 
-var tm_draw2d_api: c.tm_draw2d_api = undefined;
-var tm_ui_api: c.tm_ui_api = undefined;
+var tm_draw2d_api: *c.tm_draw2d_api = undefined;
+var tm_ui_api: *c.tm_ui_api = undefined;
 
 const TM_CUSTOM_TAB_VT_NAME = "tm_custom_tab";
 
@@ -99,12 +99,11 @@ fn tab__create(context: ?*c.tm_tab_create_context_t) callconv(.C) ?*c.tm_tab_i {
     const a = context.?.allocator;
     var id = context.?.id;
 
-    var vt = get(c.tm_the_machinery_tab_vt, &tm_global_api_registry, TM_CUSTOM_TAB_VT_NAME);
-
     const src = @src();
-    var ptr = @alignCast(8, a.*.realloc.?(a, null, 0, @sizeOf(@TypeOf(tm_tab_o)), src.file, src.line));
+    var allocPtr = a.*.realloc.?(a, null, 0, @sizeOf(tm_tab_o), src.file, src.line);
+    var ptr = @alignCast(8, allocPtr);
     var tab = @ptrCast(*tm_tab_o, ptr);
-    tab.tab_i.vt = @ptrCast(*c.tm_tab_vt, &vt);
+    tab.tab_i.vt = @ptrCast(*c.tm_tab_vt, &custom_tab_vt);
     tab.tab_i.inst = @ptrCast(*c.tm_tab_o, tab);
     tab.tab_i.root_id = id.*;
     tab.allocator = a;
@@ -133,10 +132,10 @@ export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_fon
     tm_draw2d_api.fill_rect.?(uib.vbuffer, uib.ibuffers[0], &style, rect.*);
 }
 
-fn get(comptime T: type, reg: *c.tm_api_registry_api, name: [*c]const u8) T {
+fn get(comptime T: type, reg: *c.tm_api_registry_api, name: [*c]const u8) *T {
     const voidptr = reg.*.get.?(name);
     const ptr = @ptrCast([*c]T, @alignCast(8, voidptr));
-    return ptr.*;
+    return ptr;
 }
 
 export fn tm_load_plugin(reg: *c.tm_api_registry_api, load: bool) void {
