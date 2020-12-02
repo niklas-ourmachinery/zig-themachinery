@@ -113,10 +113,10 @@ fn tab__create(context: ?*c.tm_tab_create_context_t) callconv(.C) ?*c.tm_tab_i {
 }
 
 fn tab__destroy(ctab: ?*c.tm_tab_o) callconv(.C) void {
-    var tab = @ptrCast(*tm_tab_o, @alignCast(8, ctab)).*;
-    const a = tab.allocator;
+    var tab = @ptrCast(*tm_tab_o, @alignCast(8, ctab));
+    const a = tab.*.allocator;
     const src = @src();
-    _ = a.*.realloc.?(a, &tab, @sizeOf(@TypeOf(tab)), 0, src.file, src.line);
+    _ = a.*.realloc.?(a, tab, @sizeOf(tm_tab_o), 0, src.file, src.line);
 }
 
 export fn tab__ui_zig(ctab: ?*c.tm_tab_o, font: u32, font_info: ?*const c.tm_font_t, font_scale: f32, ui: *c.tm_ui_o, rect: *const c.tm_rect_t) callconv(.C) void {
